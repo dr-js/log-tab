@@ -1,0 +1,40 @@
+{
+  "private": true,
+  "name": "log-tab",
+  "version": "0.0.0-dev.0",
+  "description": "View process output in browser tab",
+  "author": "dr-js",
+  "license": "MIT",
+  "repository": "github:dr-js/log-tab",
+  "bin": "bin/index.js",
+  "scripts": {
+    "// script ======================": "",
+    "script-base": "babel-node ./script quiet",
+    "script-pack": "babel-node ./script quiet pack",
+    "script-publish": "babel-node ./script pack publish",
+    "script-publish-dev": "babel-node ./script pack publish-dev",
+    "script-generate-spec": "cross-env BABEL_ENV=build-bin babel-node ./script/generateSpec",
+    "// build =======================": "",
+    "build-library": "babel-node ./script/webpack production profile",
+    "build-library-dev": "babel-node ./script/webpack development watch",
+    "build-browser": "babel-node ./script/webpack.browser production profile",
+    "build-browser-dev": "babel-node ./script/webpack.browser development watch",
+    "// =============================": "",
+    "analyze-stat": "npx webpack-bundle-analyzer .temp-gitignore/profile-stat.json",
+    "analyze-stat-browser": "npx webpack-bundle-analyzer -p 9999 .temp-gitignore/profile-stat.browser.json",
+    "prepack": "echo \"Error: pack with script-*\" && exit 1"
+  },
+  "engines": {
+    "node": ">=10",
+    "npm": ">=6"
+  },
+  "devDependencies": {
+    "dr-dev": "0.0.4",
+    "dr-dev-web": "0.0.4",
+    "dr-js": "^0.20.2",
+    "dr-server": "^0.0.31",
+    "style-loader": "^0.23.1",
+    "css-loader": "^2.1.0",
+    "xterm": "^3.11.0"
+  }
+}
