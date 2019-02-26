@@ -3,10 +3,12 @@
 [![i:npm]][l:npm]
 [![i:size]][l:size]
 [![i:lint]][l:lint]
+[![i:npm-dev]][l:npm]
 
 View process output in browser tab
 
 [i:npm]: https://img.shields.io/npm/v/log-tab.svg?colorB=blue
+[i:npm-dev]: https://img.shields.io/npm/v/log-tab/dev.svg
 [l:npm]: https://npm.im/log-tab
 [i:size]: https://packagephobia.now.sh/badge?p=log-tab
 [l:size]: https://packagephobia.now.sh/result?p=log-tab

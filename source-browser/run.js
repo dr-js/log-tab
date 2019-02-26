@@ -1,4 +1,4 @@
-import { debounce } from 'dr-js/module/common/function'
+import { debounce, createInsideOutPromise, withRetryAsync } from 'dr-js/module/common/function'
 import { Terminal } from 'xterm'
 import * as fit from 'xterm/lib/addons/fit/fit'
 import * as attach from 'xterm/lib/addons/attach/attach'
@@ -16,4 +16,8 @@ const createTerminal = (element, option) => {
   return terminal
 }
 
-export { createTerminal }
+export {
+  createTerminal,
+  createInsideOutPromise,
+  withRetryAsync
+}

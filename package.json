@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "log-tab",
-  "version": "0.0.0-dev.0",
+  "version": "0.0.0",
   "description": "View process output in browser tab",
   "author": "dr-js",
   "license": "MIT",
@@ -29,12 +29,12 @@
     "npm": ">=6"
   },
   "devDependencies": {
+    "css-loader": "^2.1.0",
     "dr-dev": "0.0.4",
     "dr-dev-web": "0.0.4",
-    "dr-js": "^0.20.2",
-    "dr-server": "^0.0.31",
+    "dr-js": "^0.20.3",
+    "dr-server": "^0.0.32",
     "style-loader": "^0.23.1",
-    "css-loader": "^2.1.0",
     "xterm": "^3.11.0"
   }
 }

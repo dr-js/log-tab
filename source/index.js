@@ -1,59 +1,92 @@
 import { URLSearchParams } from 'url'
 
+import { createInsideOutPromise } from 'dr-js/module/common/function'
 import { getUnusedPort } from 'dr-js/module/node/server/function'
 import { getDefaultOpen } from 'dr-js/module/node/system/DefaultOpen'
 import { runSync } from 'dr-js/module/node/system/Run'
+import { addExitListenerAsync } from 'dr-js/module/node/system/ExitListener'
 
 import { configureServer } from 'dr-server/module/configure/server'
+import { getServerOption } from 'dr-server/module/configure/option'
 
 import { configureResponder } from './configureResponder'
 import { configureWebSocket } from './configureWebSocket'
-import { parseOption, formatUsage } from './option'
+import { MODE_NAME_LIST, parseOption, formatUsage } from './option'
 import { name as packageName, version as packageVersion } from '../package.json'
 
-const startServer = async ({ tryGet, tryGetFirst }) => {
-  const host = tryGetFirst('host') || ''
-  const [ hostname, port ] = host.split(':')
-  const { server, start, option } = await configureServer({
-    hostname: hostname || 'localhost',
-    port: port || await getUnusedPort(0, hostname)
-  })
+const URL_WS = '/ws'
+const URL_RUN = '/run'
+const logger = { add: console.log }
 
-  // const logger = await configureLog(getLogOption(optionData))
-  const logger = { add: console.log }
-
-  const defaultCwd = tryGetFirst('default-cwd') || process.cwd()
-  const isAutoExit = !tryGet('keep')
-  const URL_WS = '/ws'
-  await configureResponder({ server, option, logger, URL_WS })
-  await configureWebSocket({ server, option, logger, URL_WS, defaultCwd, isAutoExit })
-
+const startCommand = async (optionData) => {
+  const command = (optionData.get('command')).join(' ')
+  const timeoutExit = optionData.tryGetFirst('timeout-exit') || 5 * 1000
+  const { server, start, /* stop, */ option } = await configureServer({ port: await getUnusedPort(0, 'localhost') })
+  await configureResponder({ server, option, logger, URL_WS, URL_RUN, isSingleCommand: true })
+  const { promise, resolve } = createInsideOutPromise()
+  let exitTimeout
+  const onProcessStart = () => { exitTimeout && clearTimeout(exitTimeout) }
+  const onProcessStop = () => {
+    exitTimeout && clearTimeout(exitTimeout)
+    if (!processStoreMap.size) exitTimeout = setTimeout(resolve, timeoutExit)
+  }
+  const { webSocketSet, processStoreMap } = configureWebSocket({ server, option, logger, URL_WS, defaultCwd: process.cwd(), timeoutExit, singleCommand: command, onProcessStart, onProcessStop })
   await start()
-  logger.add(`[SERVER UP] version: ${packageVersion}, pid: ${process.pid}, at: ${option.baseUrl}, isAutoExit: ${isAutoExit}, defaultCwd: ${defaultCwd}`)
-
-  const command = (tryGet('command') || []).join(' ')
-  __DEV__ && console.log({ command })
-  command && runSync({
-    command: getDefaultOpen(),
-    argList: [ `${option.protocol}//${option.hostname === '0.0.0.0' ? 'localhost' : option.hostname}:${option.port}?${new URLSearchParams({ command })}` ]
+  logger.add(`[SERVER UP] version: ${packageVersion}, pid: ${process.pid}, at: ${option.baseUrl}`)
+  logger.add(`[COMMAND] ${command}`)
+  addExitListenerAsync(async () => {
+    for (const processStore of processStoreMap) await processStore.stop()
+    webSocketSet.forEach((webSocket) => webSocket.close())
   })
+  runSync({
+    command: getDefaultOpen(),
+    argList: [ `${option.baseUrl}/${URL_RUN}?${new URLSearchParams({ command })}` ]
+  })
+  await promise
+  // webSocketSet.forEach((webSocket) => webSocket.close())
+  // await stop()
+  logger.add(`[SERVER DOWN]`)
+  process.exit()
+}
+
+const startServer = async (optionData) => {
+  const defaultCwd = optionData.tryGetFirst('default-cwd') || process.cwd()
+  const timeoutExit = optionData.tryGetFirst('timeout-exit') || 5 * 1000
+  const { server, start, /* stop, */ option } = await configureServer(getServerOption(optionData))
+  await configureResponder({ server, option, logger, URL_WS, URL_RUN })
+  const { webSocketSet, processStoreMap } = await configureWebSocket({ server, option, logger, URL_WS, defaultCwd, timeoutExit })
+  await start()
+  logger.add(`[SERVER UP] version: ${packageVersion}, pid: ${process.pid}, at: ${option.baseUrl}`)
+  addExitListenerAsync(async () => {
+    for (const processStore of processStoreMap) await processStore.stop()
+    webSocketSet.forEach((webSocket) => webSocket.close())
+  })
+  // webSocketSet.forEach((webSocket) => webSocket.close())
+  // await stop()
+  // logger.add(`[SERVER DOWN]`)
+}
+
+const runMode = async (modeName, optionData) => {
+  switch (modeName) {
+    case 'command':
+      return startCommand(optionData)
+    case 'host':
+      return startServer(optionData)
+  }
 }
 
 const main = async () => {
   const optionData = await parseOption()
-  const hasOption = Boolean(
-    optionData.tryGet('host') ||
-    optionData.tryGet('command')
-  )
+  const modeName = MODE_NAME_LIST.find((name) => optionData.tryGet(name))
 
-  if (!hasOption) {
+  if (!modeName) {
     return optionData.tryGet('version')
       ? console.log(JSON.stringify({ packageName, packageVersion }, null, '  '))
       : console.log(formatUsage(null, optionData.tryGet('help') ? null : 'simple'))
   }
 
-  await startServer(optionData).catch((error) => {
-    console.warn(`[Error]`, error.stack || error)
+  await runMode(modeName, optionData).catch((error) => {
+    console.warn(`[Error] in mode: ${modeName}:`, error.stack || error)
     process.exit(2)
   })
 }

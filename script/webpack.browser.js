@@ -32,7 +32,9 @@ runMain(async (logger) => {
     bail: isProduction,
     node: false, // no node mock
     output: { path: fromOutput('browser'), filename: '[name].js', library: 'LOG_TAB', libraryTarget: 'umd' },
-    entry: { index: 'source-browser/index' },
+    entry: {
+      run: 'source-browser/run'
+    },
     resolve: { alias: { 'source-browser': fromRoot('source-browser') } },
     module: {
       rules: [
