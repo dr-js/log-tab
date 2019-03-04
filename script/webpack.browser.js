@@ -1,8 +1,9 @@
 import { resolve } from 'path'
 import { DefinePlugin } from 'webpack'
 
-import { argvFlag, runMain } from 'dr-dev/module/main'
-import { getLogger } from 'dr-dev/module/logger'
+import { modify } from 'dr-js/module/node/file/Modify'
+
+import { runMain } from 'dr-dev/module/main'
 import { compileWithWebpack, commonFlag } from 'dr-dev/module/webpack'
 
 const PATH_ROOT = resolve(__dirname, '..')
@@ -13,9 +14,11 @@ const fromOutput = (...args) => resolve(PATH_OUTPUT, ...args)
 runMain(async (logger) => {
   const { mode, isWatch, isProduction, profileOutput, assetMapOutput } = await commonFlag({
     profileOutput: fromRoot('.temp-gitignore/profile-stat.browser.json'),
-    argvFlag,
     logger
   })
+
+  // copy css
+  await modify.copy(fromRoot('node_modules/xterm/dist/xterm.css'), fromOutput('browser/run.css'))
 
   const babelOption = {
     configFile: false,
@@ -32,20 +35,13 @@ runMain(async (logger) => {
     bail: isProduction,
     node: false, // no node mock
     output: { path: fromOutput('browser'), filename: '[name].js', library: 'LOG_TAB', libraryTarget: 'umd' },
-    entry: {
-      run: 'source-browser/run'
-    },
+    entry: { run: 'source-browser/run' },
     resolve: { alias: { 'source-browser': fromRoot('source-browser') } },
-    module: {
-      rules: [
-        { test: /\.js$/, use: [ { loader: 'babel-loader', options: babelOption } ] },
-        { test: /\.css$/, use: [ { loader: 'style-loader' }, { loader: 'css-loader' } ] } // just for `node_modules/xterm/dist/xterm.css`
-      ]
-    },
+    module: { rules: [ { test: /\.js$/, use: [ { loader: 'babel-loader', options: babelOption } ] } ] },
     plugins: [ new DefinePlugin({ 'process.env.NODE_ENV': JSON.stringify(mode), '__DEV__': !isProduction }) ],
     optimization: { minimize: false }
   }
 
   logger.padLog(`compile with webpack mode: ${mode}, isWatch: ${Boolean(isWatch)}`)
   await compileWithWebpack({ config, isWatch, profileOutput, assetMapOutput, logger })
-}, getLogger(`webpack-browser`))
+}, 'webpack-browser')

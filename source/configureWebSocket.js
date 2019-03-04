@@ -4,11 +4,13 @@ import { time } from 'dr-js/module/common/format'
 import { setTimeoutAsync } from 'dr-js/module/common/time'
 import { createStateStoreLite } from 'dr-js/module/common/immutable/StateStore'
 import { createResponderRouter, createRouteMap } from 'dr-js/module/node/server/Responder/Router'
-import { WEB_SOCKET_EVENT_MAP } from 'dr-js/module/node/server/WebSocket/type'
+import { WEBSOCKET_EVENT } from 'dr-js/module/node/server/WebSocket/function'
 import { enableWebSocketServer } from 'dr-js/module/node/server/WebSocket/WebSocketServer'
 import { createUpdateRequestListener } from 'dr-js/module/node/server/WebSocket/WebSocketUpgradeRequest'
 import { run } from 'dr-js/module/node/system/Run'
 import { getProcessList, getProcessPidMap, getProcessTree, findProcessTreeNode, tryKillProcessTreeNode } from 'dr-js/module/node/system/ProcessStatus'
+
+const __DEV__ = true
 
 const configureWebSocket = ({
   server, option, logger,
@@ -71,22 +73,23 @@ const responderWebSocketUpgrade = async (store, {
     processStore = createProcessStore(command, cwd, logger)
     processStoreMap.set(KEY, processStore)
     onProcessStart()
+    logger.add(`[PROCESS] start, current: ${processStoreMap.size}`)
   }
 
   if (processStore.getState().sendChunk) {
-    logger.add('process already attached, drop extra connection', { command })
-    return webSocket.on(WEB_SOCKET_EVENT_MAP.OPEN, async () => {
+    logger.add(`>> [${command}] already attached, drop extra connection`)
+    return webSocket.on(WEBSOCKET_EVENT.OPEN, async () => {
       webSocket.sendText('process already attached, drop extra connection')
       webSocket.close(1000, 'process already attached')
     })
   }
 
-  webSocket.on(WEB_SOCKET_EVENT_MAP.OPEN, async () => {
+  webSocket.on(WEBSOCKET_EVENT.OPEN, async () => {
     __DEV__ && console.log(`[RequestProtocol] >> OPEN`)
     processStore.start()
     const { exitPromise, subProcess, timeoutExitToken } = processStore.getState()
     if (timeoutExitToken) {
-      logger.add('process resume', { command })
+      logger.add(`>> [${command}] re-attach, exit canceled`)
       clearTimeout(timeoutExitToken)
       processStore.setState({ timeoutExitToken: null })
     }
@@ -106,16 +109,17 @@ const responderWebSocketUpgrade = async (store, {
       processStoreMap.delete(KEY)
       onProcessStop()
       webSocket.close(1000, 'process exit')
+      logger.add(`[PROCESS] exit, current: ${processStoreMap.size}`)
     })
   })
 
-  webSocket.on(WEB_SOCKET_EVENT_MAP.CLOSE, async () => {
+  webSocket.on(WEBSOCKET_EVENT.CLOSE, async () => {
     __DEV__ && console.log(`[RequestProtocol] >> CLOSE`)
     const { subProcess, sendChunk } = processStore.getState()
     if (subProcess) {
       subProcess.stdout.off('data', sendChunk)
       subProcess.stderr.off('data', sendChunk)
-      logger.add(`process will exit in ${time(timeoutExit)} if no re-connect`, { command })
+      logger.add(`>> [${command}] detach, will exit in ${time(timeoutExit)} if no re-connect`)
       const timeoutExitToken = setTimeout(() => {
         processStoreMap.delete(KEY)
         onProcessStop()
@@ -127,7 +131,7 @@ const responderWebSocketUpgrade = async (store, {
     processStore.setState({ webSocket: null, sendChunk: null })
   })
 
-  webSocket.on(WEB_SOCKET_EVENT_MAP.FRAME, () => {
+  webSocket.on(WEBSOCKET_EVENT.FRAME, () => {
     webSocket.close(1000, 'no stdin support yet') // TODO: should not send back data
   })
 }
@@ -148,10 +152,10 @@ const createProcessStore = (command, cwd, logger) => {
     if (getState().subProcess) return
     const { promise, subProcess } = run({ command, option: { cwd, stdio: [ 'ignore', 'pipe', 'pipe' ], env: { ...process.env, FORCE_COLOR: true } } })
     const exitPromise = promise.catch((errorWithStatus) => {
-      logger.add(`process error: ${errorWithStatus}`)
+      logger.add(`>> [${command}] error: ${errorWithStatus}`)
       return errorWithStatus
     })
-    logger.add('process start', { command })
+    logger.add(`>> [${command}] attach`)
     setState({ subProcess, exitPromise })
   }
 
@@ -165,7 +169,7 @@ const createProcessStore = (command, cwd, logger) => {
     const processTreeNode = subProcessInfo && await findProcessTreeNode(subProcessInfo, await getProcessTree(processList)) // drops ppid since sub tree may get chopped
     processTreeNode && await tryKillProcessTreeNode(processTreeNode)
     const { code, status } = await exitPromise
-    logger.add('process exit', { code, status })
+    logger.add(`>> [${command}] exit ${code}/${status}`)
     return { code, status }
   }
 

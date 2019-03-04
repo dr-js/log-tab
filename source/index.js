@@ -25,10 +25,14 @@ const startCommand = async (optionData) => {
   await configureResponder({ server, option, logger, URL_WS, URL_RUN, isSingleCommand: true })
   const { promise, resolve } = createInsideOutPromise()
   let exitTimeout
-  const onProcessStart = () => { exitTimeout && clearTimeout(exitTimeout) }
+  const onProcessStart = () => {
+    exitTimeout && clearTimeout(exitTimeout)
+    logger.add(`[PROCESS] start, current: ${processStoreMap.size}`)
+  }
   const onProcessStop = () => {
     exitTimeout && clearTimeout(exitTimeout)
     if (!processStoreMap.size) exitTimeout = setTimeout(resolve, timeoutExit)
+    logger.add(`[PROCESS] exit, current: ${processStoreMap.size}`)
   }
   const { webSocketSet, processStoreMap } = configureWebSocket({ server, option, logger, URL_WS, defaultCwd: process.cwd(), timeoutExit, singleCommand: command, onProcessStart, onProcessStop })
   await start()
