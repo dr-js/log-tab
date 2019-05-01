@@ -8,7 +8,7 @@ import { WEBSOCKET_EVENT } from 'dr-js/module/node/server/WebSocket/function'
 import { enableWebSocketServer } from 'dr-js/module/node/server/WebSocket/WebSocketServer'
 import { createUpdateRequestListener } from 'dr-js/module/node/server/WebSocket/WebSocketUpgradeRequest'
 import { run } from 'dr-js/module/node/system/Run'
-import { getProcessList, getProcessPidMap, getProcessTree, findProcessTreeNode, tryKillProcessTreeNode } from 'dr-js/module/node/system/ProcessStatus'
+import { getProcessListAsync, toProcessPidMap, toProcessTree, findProcessTreeInfo, killProcessTreeInfoAsync } from 'dr-js/module/node/system/ProcessStatus'
 
 const __DEV__ = true
 
@@ -164,10 +164,10 @@ const createProcessStore = (command, cwd, logger) => {
     if (!getState().subProcess) return
     const { exitPromise, subProcess } = getState()
     setState(initialProcessState)
-    const processList = await getProcessList()
-    const subProcessInfo = (await getProcessPidMap(processList))[ subProcess.pid ]
-    const processTreeNode = subProcessInfo && await findProcessTreeNode(subProcessInfo, await getProcessTree(processList)) // drops ppid since sub tree may get chopped
-    processTreeNode && await tryKillProcessTreeNode(processTreeNode)
+    const processList = await getProcessListAsync()
+    const subProcessInfo = (await toProcessPidMap(processList))[ subProcess.pid ]
+    const processTreeNode = subProcessInfo && await findProcessTreeInfo(subProcessInfo, await toProcessTree(processList)) // drops ppid since sub tree may get chopped
+    processTreeNode && await killProcessTreeInfoAsync(processTreeNode)
     const { code, status } = await exitPromise
     logger.add(`>> [${command}] exit ${code}/${status}`)
     return { code, status }

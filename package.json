@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "log-tab",
-  "version": "0.0.1-dev.0",
+  "version": "0.0.1-dev.1",
   "description": "View process output in browser tab",
   "author": "dr-js",
   "license": "MIT",
@@ -9,7 +9,6 @@
   "bin": "bin/index.js",
   "scripts": {
     "// script ======================": "",
-    "script-base": "babel-node ./script quiet",
     "script-pack": "babel-node ./script quiet pack",
     "script-publish": "babel-node ./script pack publish",
     "script-publish-dev": "babel-node ./script pack publish-dev",
@@ -22,6 +21,7 @@
     "// =============================": "",
     "analyze-stat": "npx webpack-bundle-analyzer .temp-gitignore/profile-stat.json",
     "analyze-stat-browser": "npx webpack-bundle-analyzer -p 9999 .temp-gitignore/profile-stat.browser.json",
+    "lint": "eslint ./source/ ./source-bin/ ./source-browser/ ./script/",
     "prepack": "echo \"Error: pack with script-*\" && exit 1"
   },
   "engines": {
@@ -29,10 +29,10 @@
     "npm": ">=6"
   },
   "devDependencies": {
-    "dr-dev": "0.0.5",
-    "dr-dev-web": "0.0.5",
-    "dr-js": "^0.21.0",
-    "dr-server": "^0.0.33",
-    "xterm": "^3.12.2"
+    "dr-dev": "0.0.6-dev.8",
+    "dr-dev-web": "0.0.6-dev.8",
+    "dr-js": "0.22.2-dev.0",
+    "dr-server": "0.2.0-dev.1",
+    "xterm": "^3.14.5"
   }
 }
