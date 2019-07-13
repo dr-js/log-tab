@@ -8,7 +8,7 @@ import { WEBSOCKET_EVENT } from 'dr-js/module/node/server/WebSocket/function'
 import { enableWebSocketServer } from 'dr-js/module/node/server/WebSocket/WebSocketServer'
 import { createUpdateRequestListener } from 'dr-js/module/node/server/WebSocket/WebSocketUpgradeRequest'
 import { run } from 'dr-js/module/node/system/Run'
-import { getProcessListAsync, toProcessPidMap, toProcessTree, findProcessTreeInfo, killProcessTreeInfoAsync } from 'dr-js/module/node/system/ProcessStatus'
+import { getProcessListAsync, toProcessPidMap, toProcessTree, findProcessTreeInfo, killProcessTreeInfoAsync } from 'dr-js/module/node/system/Process'
 
 const __DEV__ = true
 

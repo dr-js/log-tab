@@ -1,5 +1,5 @@
 import { Preset, prepareOption } from 'dr-js/module/node/module/Option/preset'
-import { getServerFormatConfig } from 'dr-server/module/configure/option'
+import { getServerFormatConfig } from 'dr-server/module/share/option'
 
 const { Config, parseCompactList } = Preset
 

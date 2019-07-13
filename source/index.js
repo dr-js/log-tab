@@ -6,8 +6,8 @@ import { getDefaultOpen } from 'dr-js/module/node/system/DefaultOpen'
 import { runSync } from 'dr-js/module/node/system/Run'
 import { addExitListenerAsync } from 'dr-js/module/node/system/ExitListener'
 
-import { configureServer } from 'dr-server/module/configure/server'
-import { getServerOption } from 'dr-server/module/configure/option'
+import { configureServer } from 'dr-server/module/share/configure/server'
+import { getServerOption } from 'dr-server/module/share/option'
 
 import { configureResponder } from './configureResponder'
 import { configureWebSocket } from './configureWebSocket'
