@@ -1,14 +1,14 @@
 import { resolve } from 'path'
 
-import { time } from 'dr-js/module/common/format'
-import { setTimeoutAsync } from 'dr-js/module/common/time'
-import { createStateStoreLite } from 'dr-js/module/common/immutable/StateStore'
-import { createResponderRouter, createRouteMap } from 'dr-js/module/node/server/Responder/Router'
-import { WEBSOCKET_EVENT } from 'dr-js/module/node/server/WebSocket/function'
-import { enableWebSocketServer } from 'dr-js/module/node/server/WebSocket/WebSocketServer'
-import { createUpdateRequestListener } from 'dr-js/module/node/server/WebSocket/WebSocketUpgradeRequest'
-import { run } from 'dr-js/module/node/system/Run'
-import { getProcessListAsync, toProcessPidMap, toProcessTree, findProcessTreeInfo, killProcessTreeInfoAsync } from 'dr-js/module/node/system/Process'
+import { time } from '@dr-js/core/module/common/format'
+import { setTimeoutAsync } from '@dr-js/core/module/common/time'
+import { createStateStoreLite } from '@dr-js/core/module/common/immutable/StateStore'
+import { createResponderRouter, createRouteMap } from '@dr-js/core/module/node/server/Responder/Router'
+import { WEBSOCKET_EVENT } from '@dr-js/core/module/node/server/WebSocket/function'
+import { enableWebSocketServer } from '@dr-js/core/module/node/server/WebSocket/WebSocketServer'
+import { createUpdateRequestListener } from '@dr-js/core/module/node/server/WebSocket/WebSocketUpgradeRequest'
+import { run } from '@dr-js/core/module/node/system/Run'
+import { getProcessListAsync, toProcessPidMap, toProcessTree, findProcessTreeInfo, killProcessTreeInfoAsync } from '@dr-js/core/module/node/system/Process'
 
 const __DEV__ = true
 
@@ -150,7 +150,12 @@ const createProcessStore = (command, cwd, logger) => {
   const start = () => {
     __DEV__ && console.log('[createProcessStore] start', { command, cwd })
     if (getState().subProcess) return
-    const { promise, subProcess } = run({ command, option: { cwd, stdio: [ 'ignore', 'pipe', 'pipe' ], env: { ...process.env, FORCE_COLOR: true } } })
+    const { promise, subProcess } = run({
+      command,
+      // TODO: support argList
+      // TODO: support optional shell: true
+      option: { cwd, stdio: [ 'ignore', 'pipe', 'pipe' ], env: { ...process.env, FORCE_COLOR: true }, shell: true }
+    })
     const exitPromise = promise.catch((errorWithStatus) => {
       logger.add(`>> [${command}] error: ${errorWithStatus}`)
       return errorWithStatus

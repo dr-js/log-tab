@@ -1,10 +1,10 @@
 import { resolve } from 'path'
 import { writeFileSync } from 'fs'
 
-import { runMain } from 'dr-dev/module/main'
-import { collectSourceRouteMap } from 'dr-dev/module/node/export/parse'
-import { generateExportInfo } from 'dr-dev/module/node/export/generate'
-import { getMarkdownFileLink, renderMarkdownAutoAppendHeaderLink, renderMarkdownBlockQuote, renderMarkdownExportPath } from 'dr-dev/module/node/export/renderMarkdown'
+import { collectSourceRouteMap } from '@dr-js/dev/module/node/export/parse'
+import { generateExportInfo } from '@dr-js/dev/module/node/export/generate'
+import { getMarkdownFileLink, renderMarkdownBlockQuote, renderMarkdownAutoAppendHeaderLink, renderMarkdownExportPath } from '@dr-js/dev/module/node/export/renderMarkdown'
+import { runMain } from '@dr-js/dev/module/main'
 
 import { formatUsage } from 'source/option'
 
@@ -12,7 +12,7 @@ const PATH_ROOT = resolve(__dirname, '..')
 const fromRoot = (...args) => resolve(PATH_ROOT, ...args)
 
 runMain(async (logger) => {
-  logger.log(`generate exportInfoMap`)
+  logger.padLog(`generate exportInfoMap`)
   const sourceRouteMap = await collectSourceRouteMap({ pathRootList: [ fromRoot('source') ], logger })
   const exportInfoMap = generateExportInfo({ sourceRouteMap })
 
@@ -30,4 +30,4 @@ runMain(async (logger) => {
     ),
     ''
   ].join('\n'))
-}, 'generate-export')
+}, 'generate-spec')

@@ -6,8 +6,8 @@
 
 View process output in browser tab
 
-[i:npm]: https://img.shields.io/npm/v/log-tab.svg?colorB=blue
-[i:npm-dev]: https://img.shields.io/npm/v/log-tab/dev.svg
+[i:npm]: https://img.shields.io/npm/v/log-tab?colorB=blue
+[i:npm-dev]: https://img.shields.io/npm/v/log-tab/dev
 [l:npm]: https://npm.im/log-tab
 [i:size]: https://packagephobia.now.sh/badge?p=log-tab
 [l:size]: https://packagephobia.now.sh/result?p=log-tab

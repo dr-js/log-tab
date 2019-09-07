@@ -1,4 +1,4 @@
-import { COMMON_LAYOUT, COMMON_STYLE, COMMON_SCRIPT } from 'dr-js/module/node/server/commonHTML'
+import { COMMON_LAYOUT, COMMON_STYLE, COMMON_SCRIPT } from '@dr-js/core/module/node/server/commonHTML'
 
 const getHTML = ({
   URL_RUN
@@ -14,8 +14,7 @@ const getHTML = ({
 
 const onLoadFunc = () => {
   const {
-    cE,
-    aCL,
+    cE, aCL,
     URLSearchParams, open,
     URL_RUN
   } = window

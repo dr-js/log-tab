@@ -1,8 +1,8 @@
-import { BASIC_EXTENSION_MAP } from 'dr-js/module/common/module/MIME'
-import { createRequestListener } from 'dr-js/module/node/server/Server'
-import { responderEnd, createResponderLog, createResponderLogEnd } from 'dr-js/module/node/server/Responder/Common'
-import { createResponderFavicon, responderSendBufferCompress, prepareBufferDataAsync } from 'dr-js/module/node/server/Responder/Send'
-import { createResponderRouter, createRouteMap } from 'dr-js/module/node/server/Responder/Router'
+import { BASIC_EXTENSION_MAP } from '@dr-js/core/module/common/module/MIME'
+import { createRequestListener } from '@dr-js/core/module/node/server/Server'
+import { responderEnd, createResponderLog, createResponderLogEnd } from '@dr-js/core/module/node/server/Responder/Common'
+import { createResponderFavicon, responderSendBufferCompress, prepareBufferDataAsync } from '@dr-js/core/module/node/server/Responder/Send'
+import { createResponderRouter, createRouteMap } from '@dr-js/core/module/node/server/Responder/Router'
 
 import { getHTML as getSelectHTML } from './HTML/select.js'
 import { getHTML as getRunHTML } from './HTML/run.js'

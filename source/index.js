@@ -1,13 +1,13 @@
 import { URLSearchParams } from 'url'
 
-import { createInsideOutPromise } from 'dr-js/module/common/function'
-import { getUnusedPort } from 'dr-js/module/node/server/function'
-import { getDefaultOpen } from 'dr-js/module/node/system/DefaultOpen'
-import { runSync } from 'dr-js/module/node/system/Run'
-import { addExitListenerAsync } from 'dr-js/module/node/system/ExitListener'
+import { createInsideOutPromise } from '@dr-js/core/module/common/function'
+import { getUnusedPort } from '@dr-js/core/module/node/server/function'
+import { getDefaultOpen } from '@dr-js/core/module/node/system/DefaultOpen'
+import { runSync } from '@dr-js/core/module/node/system/Run'
+import { addExitListenerAsync } from '@dr-js/core/module/node/system/ExitListener'
 
-import { configureServer } from 'dr-server/module/share/configure/server'
-import { getServerOption } from 'dr-server/module/share/option'
+import { configureServerPack } from '@dr-js/node/module/module/ServerPack'
+import { getServerPackOption } from '@dr-js/node/module/server/share/option'
 
 import { configureResponder } from './configureResponder'
 import { configureWebSocket } from './configureWebSocket'
@@ -21,7 +21,7 @@ const logger = { add: console.log }
 const startCommand = async (optionData) => {
   const command = (optionData.get('command')).join(' ')
   const timeoutExit = optionData.tryGetFirst('timeout-exit') || 5 * 1000
-  const { server, start, /* stop, */ option } = await configureServer({ port: await getUnusedPort(0, 'localhost') })
+  const { server, start, /* stop, */ option } = await configureServerPack({ port: await getUnusedPort(0, 'localhost') })
   await configureResponder({ server, option, logger, URL_WS, URL_RUN, isSingleCommand: true })
   const { promise, resolve } = createInsideOutPromise()
   let exitTimeout
@@ -44,7 +44,8 @@ const startCommand = async (optionData) => {
   })
   runSync({
     command: getDefaultOpen(),
-    argList: [ `${option.baseUrl}/${URL_RUN}?${new URLSearchParams({ command })}` ]
+    argList: [ `${option.baseUrl}/${URL_RUN}?${new URLSearchParams({ command })}` ],
+    option: { shell: true }
   })
   await promise
   // webSocketSet.forEach((webSocket) => webSocket.close())
@@ -56,7 +57,7 @@ const startCommand = async (optionData) => {
 const startServer = async (optionData) => {
   const defaultCwd = optionData.tryGetFirst('default-cwd') || process.cwd()
   const timeoutExit = optionData.tryGetFirst('timeout-exit') || 5 * 1000
-  const { server, start, /* stop, */ option } = await configureServer(getServerOption(optionData))
+  const { server, start, /* stop, */ option } = await configureServerPack(getServerPackOption(optionData))
   await configureResponder({ server, option, logger, URL_WS, URL_RUN })
   const { webSocketSet, processStoreMap } = await configureWebSocket({ server, option, logger, URL_WS, defaultCwd, timeoutExit })
   await start()

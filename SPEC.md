@@ -32,13 +32,17 @@
 >       command to run
 >   --host --H -H [OPTIONAL] [ARGUMENT=1]
 >       set "hostname:port"
->     --https --S -S [OPTIONAL-CHECK] [ARGUMENT=0+]
+>     --https --S -S [ARGUMENT=0+]
 >         set to enable
->       --file-SSL-key [OPTIONAL-CHECK] [ARGUMENT=1]
->       --file-SSL-cert [OPTIONAL-CHECK] [ARGUMENT=1]
->       --file-SSL-chain [OPTIONAL-CHECK] [ARGUMENT=1]
->       --file-SSL-dhparam [OPTIONAL-CHECK] [ARGUMENT=1]
->     --default-cwd [OPTIONAL-CHECK] [ARGUMENT=1]
+>       --file-TLS-key [ARGUMENT=1]
+>       --file-TLS-cert [ARGUMENT=1]
+>       --file-TLS-CA [ARGUMENT=1]
+>           trusted CA cert
+>       --file-TLS-SNI-config [ARGUMENT=1]
+>           TLS SNI JSON like: { [hostname]: { key, cert, ca } }
+>       --file-TLS-dhparam [ARGUMENT=1]
+>           Diffie-Hellman Key Exchange, generate with: "openssl dhparam -dsaparam -outform PEM -out output/path/dh4096.pem 4096"
+>     --default-cwd [ARGUMENT=1]
 >         default cwd, default to cwd
 > ENV Usage:
 >   "
@@ -49,12 +53,13 @@
 >     export LOG_TAB_TIMEOUT_EXIT="[OPTIONAL] [ARGUMENT=1]"
 >     export LOG_TAB_COMMAND="[OPTIONAL] [ARGUMENT=1+]"
 >     export LOG_TAB_HOST="[OPTIONAL] [ARGUMENT=1]"
->     export LOG_TAB_HTTPS="[OPTIONAL-CHECK] [ARGUMENT=0+]"
->     export LOG_TAB_FILE_SSL_KEY="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export LOG_TAB_FILE_SSL_CERT="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export LOG_TAB_FILE_SSL_CHAIN="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export LOG_TAB_FILE_SSL_DHPARAM="[OPTIONAL-CHECK] [ARGUMENT=1]"
->     export LOG_TAB_DEFAULT_CWD="[OPTIONAL-CHECK] [ARGUMENT=1]"
+>     export LOG_TAB_HTTPS="[ARGUMENT=0+]"
+>     export LOG_TAB_FILE_TLS_KEY="[ARGUMENT=1]"
+>     export LOG_TAB_FILE_TLS_CERT="[ARGUMENT=1]"
+>     export LOG_TAB_FILE_TLS_CA="[ARGUMENT=1]"
+>     export LOG_TAB_FILE_TLS_SNI_CONFIG="[ARGUMENT=1]"
+>     export LOG_TAB_FILE_TLS_DHPARAM="[ARGUMENT=1]"
+>     export LOG_TAB_DEFAULT_CWD="[ARGUMENT=1]"
 >   "
 > CONFIG Usage:
 >   {
@@ -64,11 +69,12 @@
 >     "timeoutExit": [ "[OPTIONAL] [ARGUMENT=1]" ],
 >     "command": [ "[OPTIONAL] [ARGUMENT=1+]" ],
 >     "host": [ "[OPTIONAL] [ARGUMENT=1]" ],
->     "https": [ "[OPTIONAL-CHECK] [ARGUMENT=0+]" ],
->     "fileSSLKey": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
->     "fileSSLCert": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
->     "fileSSLChain": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
->     "fileSSLDhparam": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
->     "defaultCwd": [ "[OPTIONAL-CHECK] [ARGUMENT=1]" ],
+>     "https": [ "[ARGUMENT=0+]" ],
+>     "fileTLSKey": [ "[ARGUMENT=1]" ],
+>     "fileTLSCert": [ "[ARGUMENT=1]" ],
+>     "fileTLSCA": [ "[ARGUMENT=1]" ],
+>     "fileTLSSNIConfig": [ "[ARGUMENT=1]" ],
+>     "fileTLSDhparam": [ "[ARGUMENT=1]" ],
+>     "defaultCwd": [ "[ARGUMENT=1]" ],
 >   }
 > ```

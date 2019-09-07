@@ -1,7 +1,7 @@
 import { resolve } from 'path'
 
-import { runMain } from 'dr-dev/module/main'
-import { compileWithWebpack, commonFlag } from 'dr-dev/module/webpack'
+import { compileWithWebpack, commonFlag } from '@dr-js/dev/module/webpack'
+import { runMain } from '@dr-js/dev/module/main'
 
 const PATH_ROOT = resolve(__dirname, '..')
 const PATH_OUTPUT = resolve(__dirname, '../output-gitignore')
@@ -12,9 +12,9 @@ runMain(async (logger) => {
   const { mode, isWatch, profileOutput, getCommonWebpackConfig } = await commonFlag({ fromRoot, logger })
 
   const config = getCommonWebpackConfig({
+    isNodeEnv: true,
     output: { path: fromOutput('library'), filename: '[name].js' },
-    entry: { index: 'source/index' },
-    isNodeEnv: true
+    entry: { index: 'source/index' }
   })
 
   logger.padLog(`compile with webpack mode: ${mode}, isWatch: ${Boolean(isWatch)}`)
