@@ -8,7 +8,7 @@ import { getHTML as getSelectHTML } from './HTML/select.js'
 import { getHTML as getRunHTML } from './HTML/run.js'
 
 const configureResponder = async ({
-  server, option, logger,
+  serverExot, logger,
   URL_WS,
   URL_RUN,
   isSingleCommand
@@ -29,10 +29,10 @@ const configureResponder = async ({
     [ [ '/favicon', '/favicon.ico' ], 'GET', createResponderFavicon() ]
   ].filter(Boolean))
 
-  server.on('request', createRequestListener({
+  serverExot.server.on('request', createRequestListener({
     responderList: [
       createResponderLog({ log: logger.add }),
-      createResponderRouter({ routeMap, baseUrl: option.baseUrl })
+      createResponderRouter({ routeMap, baseUrl: serverExot.option.baseUrl })
     ],
     responderEnd: (store) => {
       responderEnd(store)

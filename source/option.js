@@ -1,5 +1,5 @@
 import { Preset, prepareOption } from '@dr-js/core/module/node/module/Option/preset'
-import { getServerPackFormatConfig } from '@dr-js/node/module/server/share/option'
+import { getServerExotFormatConfig } from '@dr-js/node/module/server/share/option'
 
 const { Config, parseCompactList } = Preset
 
@@ -7,7 +7,7 @@ const MODE_FORMAT_LIST = [
   ...parseCompactList(
     'command,C/AS,O|command to run'
   ),
-  getServerPackFormatConfig(parseCompactList(
+  getServerExotFormatConfig(parseCompactList(
     'default-cwd/SP,O|default cwd, default to cwd'
   ))
 ]

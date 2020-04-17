@@ -17,7 +17,10 @@ const setupTerminal = (element, { urlWebSocket, ...option }) => {
 
   const attachWebSocketLoop = (terminal, urlWebSocket) => {
     attachWebSocket(terminal, urlWebSocket)
-      .catch(() => attachWebSocketLoop(terminal, urlWebSocket))
+      .catch((error) => {
+        console.log({ error })
+        setTimeout(() => attachWebSocketLoop(terminal, urlWebSocket))
+      })
   }
   attachWebSocketLoop(terminal, urlWebSocket)
 }
@@ -43,7 +46,7 @@ const attachWebSocket = async (terminal, urlWebSocket) => {
     attachAddon.dispose()
     terminal.writeln('websocket close')
     console.log('websocket close')
-    error ? resolve() : reject(error)
+    error ? reject(error) : resolve()
   }
   const onErrorWebSocket = (error) => {
     terminal.writeln(`websocket error: ${error}`)

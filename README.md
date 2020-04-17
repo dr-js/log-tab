@@ -21,4 +21,4 @@ View process output in browser tab
 - 📁 [source-bin/](source-bin/)
   - bin source code, in output package will be `log-tab/bin`
 - 📄 [SPEC.md](SPEC.md)
-  - list of all directly accessible codes, sort of an API lockfile
+  - list of all directly accessible codes, sort of API lockfile

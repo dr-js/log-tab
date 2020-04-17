@@ -14,6 +14,7 @@ const getHTML = ({
 
 const onLoadFunc = () => {
   const {
+    document,
     cE, aCL,
     URLSearchParams, open,
     URL_RUN

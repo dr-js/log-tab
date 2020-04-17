@@ -2,17 +2,21 @@ import { URLSearchParams } from 'url'
 
 import { createInsideOutPromise } from '@dr-js/core/module/common/function'
 import { getUnusedPort } from '@dr-js/core/module/node/server/function'
-import { getDefaultOpen } from '@dr-js/core/module/node/system/DefaultOpen'
-import { runSync } from '@dr-js/core/module/node/system/Run'
+import { getDefaultOpenCommandList } from '@dr-js/core/module/node/system/DefaultOpen'
+import { run } from '@dr-js/core/module/node/system/Run'
 import { addExitListenerAsync } from '@dr-js/core/module/node/system/ExitListener'
 
-import { configureServerPack } from '@dr-js/node/module/module/ServerPack'
-import { getServerPackOption } from '@dr-js/node/module/server/share/option'
+import { configureServerExot } from '@dr-js/node/module/module/ServerExot'
+import { getServerExotOption } from '@dr-js/node/module/server/share/option'
 
 import { configureResponder } from './configureResponder'
 import { configureWebSocket } from './configureWebSocket'
 import { MODE_NAME_LIST, parseOption, formatUsage } from './option'
-import { name as packageName, version as packageVersion } from '../package.json'
+
+import PACKAGE_JSON from '../package.json' // TODO: wait for: https://github.com/webpack/webpack/issues/11676
+// const { name: packageName, version: packageVersion } = PACKAGE_JSON
+const packageName = PACKAGE_JSON.name
+const packageVersion = PACKAGE_JSON.version
 
 const URL_WS = '/ws'
 const URL_RUN = '/run'
@@ -21,54 +25,48 @@ const logger = { add: console.log }
 const startCommand = async (optionData) => {
   const command = (optionData.get('command')).join(' ')
   const timeoutExit = optionData.tryGetFirst('timeout-exit') || 5 * 1000
-  const { server, start, /* stop, */ option } = await configureServerPack({ port: await getUnusedPort(0, 'localhost') })
-  await configureResponder({ server, option, logger, URL_WS, URL_RUN, isSingleCommand: true })
+  const serverExot = await configureServerExot({ hostname: '0.0.0.0', port: await getUnusedPort(0, '0.0.0.0') })
+  await configureResponder({ serverExot, logger, URL_WS, URL_RUN, isSingleCommand: true })
   const { promise, resolve } = createInsideOutPromise()
   let exitTimeout
   const onProcessStart = () => {
     exitTimeout && clearTimeout(exitTimeout)
-    logger.add(`[PROCESS] start, current: ${processStoreMap.size}`)
+    logger.add(`[PROCESS] start, current: ${serverExot.processStoreMap.size}`)
   }
   const onProcessStop = () => {
     exitTimeout && clearTimeout(exitTimeout)
-    if (!processStoreMap.size) exitTimeout = setTimeout(resolve, timeoutExit)
-    logger.add(`[PROCESS] exit, current: ${processStoreMap.size}`)
+    if (!serverExot.processStoreMap.size) exitTimeout = setTimeout(resolve, timeoutExit)
+    logger.add(`[PROCESS] exit, current: ${serverExot.processStoreMap.size}`)
   }
-  const { webSocketSet, processStoreMap } = configureWebSocket({ server, option, logger, URL_WS, defaultCwd: process.cwd(), timeoutExit, singleCommand: command, onProcessStart, onProcessStop })
-  await start()
-  logger.add(`[SERVER UP] version: ${packageVersion}, pid: ${process.pid}, at: ${option.baseUrl}`)
+  configureWebSocket({ serverExot, logger, URL_WS, defaultCwd: process.cwd(), timeoutExit, singleCommand: command, onProcessStart, onProcessStop })
+  await serverExot.up()
+  logger.add(`[SERVER UP] version: ${packageVersion}, pid: ${process.pid}, at: ${serverExot.option.baseUrl}`)
   logger.add(`[COMMAND] ${command}`)
-  addExitListenerAsync(async () => {
-    for (const processStore of processStoreMap) await processStore.stop()
-    webSocketSet.forEach((webSocket) => webSocket.close())
-  })
-  runSync({
-    command: getDefaultOpen(),
-    argList: [ `${option.baseUrl}/${URL_RUN}?${new URLSearchParams({ command })}` ],
-    option: { shell: true }
-  })
-  await promise
-  // webSocketSet.forEach((webSocket) => webSocket.close())
-  // await stop()
+  const [ commandOpen, ...argList ] = [ ...getDefaultOpenCommandList(), `${serverExot.option.baseUrl}${URL_RUN}?${new URLSearchParams({ command })}` ]
+  await Promise.all([
+    promise,
+    run({ command: commandOpen, argList }).promise
+  ])
   logger.add('[SERVER DOWN]')
-  process.exit()
+  for (const processStore of serverExot.processStoreMap) await processStore.stop()
+  serverExot.webSocketSet.forEach((webSocket) => webSocket.close())
+  await serverExot.down()
 }
 
 const startServer = async (optionData) => {
   const defaultCwd = optionData.tryGetFirst('default-cwd') || process.cwd()
   const timeoutExit = optionData.tryGetFirst('timeout-exit') || 5 * 1000
-  const { server, start, /* stop, */ option } = await configureServerPack(getServerPackOption(optionData))
-  await configureResponder({ server, option, logger, URL_WS, URL_RUN })
-  const { webSocketSet, processStoreMap } = await configureWebSocket({ server, option, logger, URL_WS, defaultCwd, timeoutExit })
-  await start()
-  logger.add(`[SERVER UP] version: ${packageVersion}, pid: ${process.pid}, at: ${option.baseUrl}`)
+  const serverExot = await configureServerExot(getServerExotOption(optionData))
+  await configureResponder({ serverExot, logger, URL_WS, URL_RUN })
+  configureWebSocket({ serverExot, logger, URL_WS, defaultCwd, timeoutExit })
+  await serverExot.up()
+  logger.add(`[SERVER UP] version: ${packageVersion}, pid: ${process.pid}, at: ${serverExot.option.baseUrl}`)
   addExitListenerAsync(async () => {
-    for (const processStore of processStoreMap) await processStore.stop()
-    webSocketSet.forEach((webSocket) => webSocket.close())
+    logger.add('[SERVER DOWN]')
+    for (const processStore of serverExot.processStoreMap) await processStore.stop()
+    serverExot.webSocketSet.forEach((webSocket) => webSocket.close())
+    await serverExot.down()
   })
-  // webSocketSet.forEach((webSocket) => webSocket.close())
-  // await stop()
-  // logger.add(`[SERVER DOWN]`)
 }
 
 const runMode = async (modeName, optionData) => {

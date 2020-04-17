@@ -13,44 +13,41 @@ import { getProcessListAsync, toProcessPidMap, toProcessTree, findProcessTreeInf
 const __DEV__ = true
 
 const configureWebSocket = ({
-  server, option, logger,
+  serverExot, logger,
   URL_WS,
   defaultCwd, timeoutExit, singleCommand,
   onProcessStart = () => {},
   onProcessStop = () => {}
 }) => {
-  const processStoreMap = new Map()
+  serverExot.processStoreMap = new Map()
 
   const config = {
-    server,
     logger,
     defaultCwd,
     timeoutExit,
     singleCommand,
-    processStoreMap,
+    processStoreMap: serverExot.processStoreMap,
     onProcessStart,
     onProcessStop
   }
 
-  const webSocketSet = enableWebSocketServer({
-    server,
+  serverExot.webSocketSet = enableWebSocketServer({
+    server: serverExot.server,
     onUpgradeRequest: createUpdateRequestListener({
       responderList: [
         createResponderRouter({
           routeMap: createRouteMap([
             [ URL_WS, 'GET', (store) => responderWebSocketUpgrade(store, config) ]
           ]),
-          baseUrl: option.baseUrl
+          baseUrl: serverExot.option.baseUrl
         })
       ]
     })
   })
-
-  return { webSocketSet, processStoreMap }
 }
 
 const responderWebSocketUpgrade = async (store, {
-  server, logger,
+  logger,
   defaultCwd, timeoutExit, singleCommand,
   processStoreMap,
   onProcessStart, onProcessStop

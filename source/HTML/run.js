@@ -24,6 +24,7 @@ const mainStyle = `<style>
 
 const onLoadFunc = () => {
   const {
+    document,
     qS,
     URLSearchParams, location,
     URL_WS,
