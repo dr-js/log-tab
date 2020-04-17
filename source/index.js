@@ -50,7 +50,7 @@ const startCommand = async (optionData) => {
   await promise
   // webSocketSet.forEach((webSocket) => webSocket.close())
   // await stop()
-  logger.add(`[SERVER DOWN]`)
+  logger.add('[SERVER DOWN]')
   process.exit()
 }
 

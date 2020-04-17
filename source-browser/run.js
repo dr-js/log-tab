@@ -27,8 +27,8 @@ const attachWebSocket = async (terminal, urlWebSocket) => {
 
   const websocket = new window.WebSocket(urlWebSocket, 'log-tab')
   const attachAddon = new AttachAddon(websocket)
-  terminal.writeln(`websocket connect`)
-  console.log(`websocket connect`)
+  terminal.writeln('websocket connect')
+  console.log('websocket connect')
 
   const onOpenWebSocket = () => {
     // The following line of code:
@@ -36,13 +36,13 @@ const attachWebSocket = async (terminal, urlWebSocket) => {
     //   2. Sets up non-bidirectional communication (renders stdout/stderr)
     //   3. Buffers rendering for better performance
     terminal.loadAddon(attachAddon) // Apply the `attach` addon
-    terminal.writeln(`websocket open`)
-    console.log(`websocket open`)
+    terminal.writeln('websocket open')
+    console.log('websocket open')
   }
   const onCloseWebSocket = (error) => {
     attachAddon.dispose()
-    terminal.writeln(`websocket close`)
-    console.log(`websocket close`)
+    terminal.writeln('websocket close')
+    console.log('websocket close')
     error ? resolve() : reject(error)
   }
   const onErrorWebSocket = (error) => {

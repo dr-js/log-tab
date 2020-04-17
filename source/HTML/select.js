@@ -3,7 +3,7 @@ import { COMMON_LAYOUT, COMMON_STYLE, COMMON_SCRIPT } from '@dr-js/core/module/n
 const getHTML = ({
   URL_RUN
 }) => COMMON_LAYOUT([
-  `<title>log-tab</title>`,
+  '<title>log-tab</title>',
   COMMON_STYLE()
 ], [
   COMMON_SCRIPT({

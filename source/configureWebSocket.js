@@ -85,7 +85,7 @@ const responderWebSocketUpgrade = async (store, {
   }
 
   webSocket.on(WEBSOCKET_EVENT.OPEN, async () => {
-    __DEV__ && console.log(`[RequestProtocol] >> OPEN`)
+    __DEV__ && console.log('[RequestProtocol] >> OPEN')
     processStore.start()
     const { exitPromise, subProcess, timeoutExitToken } = processStore.getState()
     if (timeoutExitToken) {
@@ -114,7 +114,7 @@ const responderWebSocketUpgrade = async (store, {
   })
 
   webSocket.on(WEBSOCKET_EVENT.CLOSE, async () => {
-    __DEV__ && console.log(`[RequestProtocol] >> CLOSE`)
+    __DEV__ && console.log('[RequestProtocol] >> CLOSE')
     const { subProcess, sendChunk } = processStore.getState()
     if (subProcess) {
       subProcess.stdout.off('data', sendChunk)

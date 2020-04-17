@@ -5,12 +5,12 @@ import { COMMON_LAYOUT, COMMON_STYLE, COMMON_SCRIPT } from '@dr-js/core/module/n
 const getHTML = ({
   URL_WS
 }) => COMMON_LAYOUT([
-  `<title>log-tab</title>`,
+  '<title>log-tab</title>',
   COMMON_STYLE(),
   `<style>${String(readFileSync(resolve(__dirname, '../browser/run.css')))}</style>`,
   mainStyle
 ], [
-  `<div id="root"></div>`,
+  '<div id="root"></div>',
   COMMON_SCRIPT({
     URL_WS,
     onload: onLoadFunc
